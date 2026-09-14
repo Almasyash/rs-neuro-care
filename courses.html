@@ -11,6 +11,7 @@
   <meta property="og:type" content="website">
   <link rel="icon" type="image/png" href="rs logo.png">
   <link rel="stylesheet" href="style.css">
+  <script src="supabase-config.js"></script>
 </head>
 <body>
   <header class="navbar">
@@ -49,8 +50,9 @@
             <p>12 months · hybrid · practical training</p>
             <div class="course-meta"><span>⏳ 12 months</span><span>📍 Bettiah + Online</span></div>
             <p style="margin-top: 12px;">For physiotherapists & nurses — advanced neuro care techniques.</p>
-            <div style="margin-top: auto; padding-top: 16px;">
-              <a href="https://wa.me/918797459791?text=Hello%20RS%20Neuro%20%26%20Health%20Care%2C%20I%20am%20interested%20in%20enrolling%20in%20the%20Diploma%20in%20Neuro-Rehabilitation%20course.%20Please%20provide%20me%20with%20the%20admission%20details." class="btn course-enroll-btn" target="_blank" rel="noopener noreferrer">Enroll Now</a>
+            <div style="margin-top: auto; padding-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="https://wa.me/918797459791?text=Hello%20RS%20Neuro%20%26%20Health%20Care%2C%20I%20am%20interested%20in%20enrolling%20in%20the%20Diploma%20in%20Neuro-Rehabilitation%20course.%20Please%20provide%20me%20with%20the%20admission%20details." class="btn course-enroll-btn" target="_blank" rel="noopener noreferrer" style="flex: 1; text-align: center; padding: 10px 14px;">Enroll Now</a>
+              <button type="button" class="btn btn-outline" style="flex: 1; text-align: center; padding: 8px 12px; font-size: 0.85rem;" onclick="handlePortalEnrollment('crs-001', 'Diploma in Neuro-Rehabilitation')">📝 Apply Online</button>
             </div>
           </div>
           <div class="card course-card" style="display: flex; flex-direction: column;">
@@ -59,8 +61,9 @@
             <p>6 months · weekend batches</p>
             <div class="course-meta"><span>⏳ 6 months</span><span>🏥 Clinical</span></div>
             <p style="margin-top: 12px;">Hands-on chiropractic & spinal adjustment training.</p>
-            <div style="margin-top: auto; padding-top: 16px;">
-              <a href="https://wa.me/918797459791?text=Hello%20RS%20Neuro%20%26%20Health%20Care%2C%20I%20am%20interested%20in%20enrolling%20in%20the%20Certificate%20in%20Spine%20Care%20course.%20Please%20provide%20me%20with%20the%20admission%20details." class="btn course-enroll-btn" target="_blank" rel="noopener noreferrer">Enroll Now</a>
+            <div style="margin-top: auto; padding-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="https://wa.me/918797459791?text=Hello%20RS%20Neuro%20%26%20Health%20Care%2C%20I%20am%20interested%20in%20enrolling%20in%20the%20Certificate%20in%20Spine%20Care%20course.%20Please%20provide%20me%20with%20the%20admission%20details." class="btn course-enroll-btn" target="_blank" rel="noopener noreferrer" style="flex: 1; text-align: center; padding: 10px 14px;">Enroll Now</a>
+              <button type="button" class="btn btn-outline" style="flex: 1; text-align: center; padding: 8px 12px; font-size: 0.85rem;" onclick="handlePortalEnrollment('crs-002', 'Certificate in Spine Care')">📝 Apply Online</button>
             </div>
           </div>
           <div class="card course-card" style="display: flex; flex-direction: column;">
@@ -69,8 +72,9 @@
             <p>3-day intensive · CME accredited</p>
             <div class="course-meta"><span>⏳ 3 days</span><span>🎓 CME</span></div>
             <p style="margin-top: 12px;">Latest non-surgical interventions for chronic pain.</p>
-            <div style="margin-top: auto; padding-top: 16px;">
-              <a href="https://wa.me/918797459791?text=Hello%20RS%20Neuro%20%26%20Health%20Care%2C%20I%20am%20interested%20in%20enrolling%20in%20the%20Pain%20Management%20Workshop%20course.%20Please%20provide%20me%20with%20the%20admission%20details." class="btn course-enroll-btn" target="_blank" rel="noopener noreferrer">Enroll Now</a>
+            <div style="margin-top: auto; padding-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="https://wa.me/918797459791?text=Hello%20RS%20Neuro%20%26%20Health%20Care%2C%20I%20am%20interested%20in%20enrolling%20in%20the%20Pain%20Management%20Workshop%20course.%20Please%20provide%20me%20with%20the%20admission%20details." class="btn course-enroll-btn" target="_blank" rel="noopener noreferrer" style="flex: 1; text-align: center; padding: 10px 14px;">Enroll Now</a>
+              <button type="button" class="btn btn-outline" style="flex: 1; text-align: center; padding: 8px 12px; font-size: 0.85rem;" onclick="handlePortalEnrollment('crs-003', 'Pain Management Workshop')">📝 Apply Online</button>
             </div>
           </div>
           <div class="card course-card" style="display: flex; flex-direction: column;">
@@ -79,8 +83,9 @@
             <p>Free monthly sessions</p>
             <div class="course-meta"><span>⏳ Monthly</span><span>❤️ Free</span></div>
             <p style="margin-top: 12px;">Learn about neuropathy, back pain, and preventive care.</p>
-            <div style="margin-top: auto; padding-top: 16px;">
-              <a href="https://wa.me/918797459791?text=Hello%20RS%20Neuro%20%26%20Health%20Care%2C%20I%20am%20interested%20in%20enrolling%20in%20the%20Patient%20Education%20Program%20course.%20Please%20provide%20me%20with%20the%20admission%20details." class="btn course-enroll-btn" target="_blank" rel="noopener noreferrer">Enroll Now</a>
+            <div style="margin-top: auto; padding-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="https://wa.me/918797459791?text=Hello%20RS%20Neuro%20%26%20Health%20Care%2C%20I%20am%20interested%20in%20enrolling%20in%20the%20Patient%20Education%20Program%20course.%20Please%20provide%20me%20with%20the%20admission%20details." class="btn course-enroll-btn" target="_blank" rel="noopener noreferrer" style="flex: 1; text-align: center; padding: 10px 14px;">Enroll Now</a>
+              <button type="button" class="btn btn-outline" style="flex: 1; text-align: center; padding: 8px 12px; font-size: 0.85rem;" onclick="handlePortalEnrollment('crs-004', 'Patient Education Program')">📝 Apply Online</button>
             </div>
           </div>
         </div>
@@ -137,6 +142,27 @@
         }
       });
     });
+
+    // Portal Online Application Handler
+    async function handlePortalEnrollment(courseId, courseTitle) {
+      const user = RSApp.getCurrentUser();
+      if (!user) {
+        if (confirm(`To apply online for "${courseTitle}", please log in or register your student account. Would you like to go to the login page?`)) {
+          window.location.href = 'login.html';
+        }
+        return;
+      }
+
+      if (confirm(`Submit online enrollment application for "${courseTitle}"?`)) {
+        const { data, error } = await RSApp.createEnrollment(courseId, 'Applied via course page');
+        if (error) {
+          alert(error.message);
+        } else {
+          alert(`Application submitted successfully for ${courseTitle}! Redirecting to your dashboard...`);
+          window.location.href = 'dashboard.html';
+        }
+      }
+    }
   </script>
 </body>
 </html>

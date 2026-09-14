@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student & Patient Dashboard | RS Neuro Care Centre</title>
+  <meta name="description" content="Personal user dashboard for managing course enrollments, medical support tickets, and account settings.">
+  <link rel="icon" type="image/png" href="rs logo.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="supabase-config.js"></script>
+</head>
+<body style="background: var(--gray-light);">
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">
+        <img src="rs logo.png" alt="RS Neuro Care Centre Logo" class="logo-img">
+        <span>Neuro Care</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html">🏠 Home</a>
+        <a href="about.html">👨‍⚕️ About</a>
+        <a href="services.html">🩺 Services</a>
+        <a href="courses.html">🎓 Courses</a>
+        <a href="contact.html">📞 Contact</a>
+        <a href="tel:08797459791" class="btn">📅 Call now</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="dashboard-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="dashboard-sidebar">
+        <div style="text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--soft-blue);">
+          <div style="font-size: 3rem; margin-bottom: 6px;">🎓</div>
+          <h3 id="sidebarUserName" style="font-size: 1.1rem; margin-bottom: 2px;">User</h3>
+          <span class="badge badge-user" id="sidebarUserRole">Student / Patient</span>
+        </div>
+        <ul class="dashboard-menu">
+          <li>
+            <button class="dashboard-menu-item active" onclick="switchDashboardTab('profile', this)">
+              <span>👤</span> My Profile
+            </button>
+          </li>
+          <li>
+            <button class="dashboard-menu-item" onclick="switchDashboardTab('courses', this)">
+              <span>📚</span> My Enrollments
+            </button>
+          </li>
+          <li>
+            <button class="dashboard-menu-item" onclick="switchDashboardTab('support', this)">
+              <span>💬</span> Support Tickets
+            </button>
+          </li>
+          <li>
+            <button class="dashboard-menu-item" onclick="switchDashboardTab('security', this)">
+              <span>🔒</span> Security & Settings
+            </button>
+          </li>
+          <li style="margin-top: 16px; border-top: 1px solid var(--soft-blue); padding-top: 10px;">
+            <button class="dashboard-menu-item" style="color: #b42318;" onclick="handleLogout()">
+              <span>🚪</span> Logout
+            </button>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Main Content Area -->
+      <section class="dashboard-main">
+        <!-- Tab: Profile -->
+        <div id="tabContentProfile" class="card" style="padding: 30px;">
+          <h2 style="font-size: 1.5rem; margin-bottom: 6px;">👤 Profile Information</h2>
+          <p>View and manage your personal contact information.</p>
+
+          <div id="profileAlert" style="display: none; padding: 12px; border-radius: 12px; margin-bottom: 16px;"></div>
+
+          <form onsubmit="handleUpdateProfile(event)" style="max-width: 500px; margin-top: 20px;">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="profName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address (Registered)</label>
+              <input type="email" id="profEmail" class="form-control" disabled style="background: var(--soft-blue); cursor: not-allowed;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone / WhatsApp Number</label>
+              <input type="tel" id="profPhone" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Account Status</label>
+              <div><span class="badge badge-active" id="profStatusBadge">Active Account</span></div>
+            </div>
+            <button type="submit" class="btn" style="margin-top: 10px;">💾 Save Changes</button>
+          </form>
+        </div>
+
+        <!-- Tab: Enrollments -->
+        <div id="tabContentCourses" class="card" style="display: none; padding: 30px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.5rem; margin-bottom: 4px;">📚 My Course Enrollments</h2>
+              <p>Track your applied medical and rehabilitation training programs.</p>
+            </div>
+            <a href="courses.html" class="btn btn-outline" style="padding: 8px 18px; font-size: 0.88rem;">➕ Browse All Courses</a>
+          </div>
+
+          <div id="enrollmentsList" class="rs-table-container">
+            <p style="padding: 20px; text-align: center; color: var(--text-soft);">Loading your enrollments...</p>
+          </div>
+        </div>
+
+        <!-- Tab: Support Tickets -->
+        <div id="tabContentSupport" class="card" style="display: none; padding: 30px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.5rem; margin-bottom: 4px;">💬 Support & Helpdesk</h2>
+              <p>Direct communication with Dr. R. K. Gupta & clinic administration.</p>
+            </div>
+            <button class="btn" style="padding: 8px 18px; font-size: 0.88rem;" onclick="openNewTicketModal()">➕ Create Support Ticket</button>
+          </div>
+
+          <div id="ticketsList" class="rs-table-container">
+            <p style="padding: 20px; text-align: center; color: var(--text-soft);">Loading support tickets...</p>
+          </div>
+        </div>
+
+        <!-- Tab: Security -->
+        <div id="tabContentSecurity" class="card" style="display: none; padding: 30px;">
+          <h2 style="font-size: 1.5rem; margin-bottom: 6px;">🔒 Security & Password</h2>
+          <p>Manage your account security and authentication credentials.</p>
+
+          <div id="securityAlert" style="display: none; padding: 12px; border-radius: 12px; margin-bottom: 16px;"></div>
+
+          <form onsubmit="handleChangePassword(event)" style="max-width: 480px; margin-top: 20px;">
+            <div class="form-group">
+              <label class="form-label">Current Password</label>
+              <input type="password" id="currentPass" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" id="newPass" class="form-control" minlength="6" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input type="password" id="confirmPass" class="form-control" minlength="6" required>
+            </div>
+            <button type="submit" class="btn" style="margin-top: 10px;">Update Password</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal: Create Support Ticket -->
+  <div class="rs-modal-backdrop" id="modalNewTicket">
+    <div class="rs-modal-content">
+      <button class="rs-modal-close" onclick="closeModal('modalNewTicket')">✕</button>
+      <h3 style="font-size: 1.3rem; margin-bottom: 8px;">Create New Support Ticket</h3>
+      <p style="font-size: 0.88rem; margin-bottom: 20px;">Our medical & academic team responds within 24 hours.</p>
+
+      <form onsubmit="handleCreateTicket(event)">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="ticketCategory" class="form-control" required>
+            <option value="admission">Course Admission & Fees</option>
+            <option value="course_material">Course Content & Hybrid Classes</option>
+            <option value="medical">Medical / Clinic Appointment Query</option>
+            <option value="general">General Inquiry</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select id="ticketPriority" class="form-control" required>
+            <option value="low">Low Priority</option>
+            <option value="medium" selected>Medium Priority</option>
+            <option value="high">High Priority</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <input type="text" id="ticketSubject" class="form-control" placeholder="Brief summary of your query" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Detailed Message</label>
+          <textarea id="ticketMessage" class="form-control" rows="4" placeholder="Describe your question in detail..." required></textarea>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn" style="flex: 1;">Submit Ticket</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalNewTicket')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Ticket Conversation Thread -->
+  <div class="rs-modal-backdrop" id="modalViewTicket">
+    <div class="rs-modal-content" style="max-width: 650px;">
+      <button class="rs-modal-close" onclick="closeModal('modalViewTicket')">✕</button>
+      <div style="margin-bottom: 12px;">
+        <span class="badge" id="viewTicketStatusBadge">Open</span>
+        <h3 id="viewTicketSubject" style="font-size: 1.3rem; margin: 8px 0 4px;">Ticket Subject</h3>
+        <p style="font-size: 0.82rem; color: var(--text-soft);" id="viewTicketMeta">Created on ...</p>
+      </div>
+
+      <!-- Messages Thread -->
+      <div class="chat-thread" id="viewTicketMessages">
+        <p style="text-align: center; color: var(--text-soft);">Loading conversation...</p>
+      </div>
+
+      <!-- Reply Form -->
+      <form onsubmit="handleSendTicketReply(event)">
+        <input type="hidden" id="activeTicketId">
+        <div class="form-group" style="margin-bottom: 8px;">
+          <textarea id="replyMessageText" class="form-control" rows="3" placeholder="Type your reply here..." required></textarea>
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">💬 Send Reply</button>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <img src="rs logo.png" alt="RS Neuro Care Centre Logo" class="footer-logo-img">
+      <p>
+        <span class="footer-emoji">🧠</span> RS Neuro Care Centre — Dr. R. K. Gupta 
+        <span class="footer-emoji">🩺</span><br>
+        Manuwapul, Bettiah, Bihar 845450 · 📞 <a href="tel:08797459791" style="color: var(--primary-dark);">087974 59791</a><br>
+        © 2025 RS Neuro Care Centre. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Navigation toggle
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', () => {
+        const isOpen = navLinks.classList.toggle('nav-open');
+        navToggle.classList.toggle('active');
+        navToggle.setAttribute('aria-expanded', isOpen);
+      });
+    }
+
+    // Protect dashboard route
+    if (!RSApp.requireAuth()) {
+      // Redirect handled by requireAuth
+    }
+
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      currentUser = RSApp.getCurrentUser();
+      if (!currentUser) return;
+
+      // Populate sidebar
+      document.getElementById('sidebarUserName').textContent = currentUser.full_name;
+      document.getElementById('sidebarUserRole').textContent = currentUser.role === 'admin' ? '🛡️ Administrator' : '🎓 Student / Patient';
+
+      // Populate Profile Tab
+      document.getElementById('profName').value = currentUser.full_name;
+      document.getElementById('profEmail').value = currentUser.email;
+      document.getElementById('profPhone').value = currentUser.phone || '';
+      document.getElementById('profStatusBadge').textContent = currentUser.status.toUpperCase();
+      document.getElementById('profStatusBadge').className = 'badge badge-' + currentUser.status;
+
+      loadEnrollments();
+      loadTickets();
+    });
+
+    function switchDashboardTab(tab, btn) {
+      document.querySelectorAll('.dashboard-menu-item').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      document.getElementById('tabContentProfile').style.display = tab === 'profile' ? 'block' : 'none';
+      document.getElementById('tabContentCourses').style.display = tab === 'courses' ? 'block' : 'none';
+      document.getElementById('tabContentSupport').style.display = tab === 'support' ? 'block' : 'none';
+      document.getElementById('tabContentSecurity').style.display = tab === 'security' ? 'block' : 'none';
+
+      if (tab === 'courses') loadEnrollments();
+      if (tab === 'support') loadTickets();
+    }
+
+    // --- Profile Update ---
+    async function handleUpdateProfile(e) {
+      e.preventDefault();
+      const name = document.getElementById('profName').value;
+      const phone = document.getElementById('profPhone').value;
+      const alertBox = document.getElementById('profileAlert');
+
+      const { data, error } = await RSApp.updateProfile(currentUser.id, { full_name: name, phone: phone });
+      alertBox.style.display = 'block';
+      if (error) {
+        alertBox.style.background = '#fef3f2';
+        alertBox.style.color = '#b42318';
+        alertBox.textContent = error.message;
+      } else {
+        alertBox.style.background = '#e6f7ec';
+        alertBox.style.color = '#027a48';
+        alertBox.textContent = 'Profile updated successfully!';
+        currentUser = RSApp.getCurrentUser();
+        document.getElementById('sidebarUserName').textContent = currentUser.full_name;
+      }
+    }
+
+    // --- Enrollments ---
+    async function loadEnrollments() {
+      const container = document.getElementById('enrollmentsList');
+      const { data, error } = await RSApp.getEnrollments();
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = `
+          <div style="padding: 40px; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">📋</div>
+            <p>You haven't submitted any course enrollments yet.</p>
+            <a href="courses.html" class="btn" style="margin-top: 10px;">Explore Our Courses</a>
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <table class="rs-table">
+          <thead>
+            <tr>
+              <th>Course Program</th>
+              <th>Applied Date</th>
+              <th>Admission Status</th>
+              <th>Advisor Notes</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      data.forEach(enr => {
+        const statusClass = 'badge-' + enr.status;
+        const dateFormatted = new Date(enr.enrollment_date).toLocaleDateString();
+        const courseTitle = RSApp.escapeHTML(enr.course ? enr.course.title : 'Course');
+        const notes = RSApp.escapeHTML(enr.notes || 'Under review by admissions.');
+        
+        // WhatsApp counselor link
+        const waMsg = encodeURIComponent(`Hello Dr. Gupta, I am checking the status of my application for "${enr.course ? enr.course.title : ''}" (App ID: ${enr.id}).`);
+        const waLink = `https://wa.me/918797459791?text=${waMsg}`;
+
+        html += `
+          <tr>
+            <td><strong>${courseTitle}</strong></td>
+            <td>${dateFormatted}</td>
+            <td><span class="badge ${statusClass}">${enr.status.toUpperCase()}</span></td>
+            <td><small>${notes}</small></td>
+            <td>
+              <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;">
+                💬 Contact Advisor
+              </a>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    // --- Support Tickets ---
+    async function loadTickets() {
+      const container = document.getElementById('ticketsList');
+      const { data, error } = await RSApp.getTickets();
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = `
+          <div style="padding: 40px; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">✉️</div>
+            <p>No support tickets filed. Have a question for Dr. Gupta or the medical staff?</p>
+            <button class="btn" style="margin-top: 10px;" onclick="openNewTicketModal()">Open a Support Ticket</button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <table class="rs-table">
+          <thead>
+            <tr>
+              <th>Ticket ID</th>
+              <th>Subject</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      data.forEach(tkt => {
+        const statusClass = 'badge-' + tkt.status;
+        const priorityClass = 'badge-' + tkt.priority;
+        const subject = RSApp.escapeHTML(tkt.subject);
+        const category = RSApp.escapeHTML(tkt.category.replace('_', ' ').toUpperCase());
+
+        html += `
+          <tr>
+            <td><code>${tkt.id}</code></td>
+            <td><strong>${subject}</strong></td>
+            <td><small>${category}</small></td>
+            <td><span class="badge ${priorityClass}">${tkt.priority.toUpperCase()}</span></td>
+            <td><span class="badge ${statusClass}">${tkt.status.replace('_', ' ').toUpperCase()}</span></td>
+            <td>
+              <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;" onclick="viewTicket('${tkt.id}')">
+                💬 View Thread
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function openNewTicketModal() {
+      document.getElementById('modalNewTicket').classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    async function handleCreateTicket(e) {
+      e.preventDefault();
+      const cat = document.getElementById('ticketCategory').value;
+      const prio = document.getElementById('ticketPriority').value;
+      const subj = document.getElementById('ticketSubject').value;
+      const msg = document.getElementById('ticketMessage').value;
+
+      const { data, error } = await RSApp.createTicket(subj, cat, prio, msg);
+      if (error) {
+        alert('Error creating ticket: ' + error.message);
+        return;
+      }
+      closeModal('modalNewTicket');
+      loadTickets();
+    }
+
+    async function viewTicket(ticketId) {
+      const { data, error } = await RSApp.getTicketMessages(ticketId);
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      const { ticket, messages } = data;
+      document.getElementById('activeTicketId').value = ticket.id;
+      document.getElementById('viewTicketSubject').textContent = ticket.subject;
+      document.getElementById('viewTicketMeta').textContent = `Category: ${ticket.category.toUpperCase()} · Priority: ${ticket.priority.toUpperCase()} · ID: ${ticket.id}`;
+      
+      const badge = document.getElementById('viewTicketStatusBadge');
+      badge.textContent = ticket.status.replace('_', ' ').toUpperCase();
+      badge.className = 'badge badge-' + ticket.status;
+
+      const threadContainer = document.getElementById('viewTicketMessages');
+      if (messages.length === 0) {
+        threadContainer.innerHTML = '<p style="text-align: center; color: var(--text-soft);">No messages in this ticket yet.</p>';
+      } else {
+        let msgHtml = '';
+        messages.forEach(m => {
+          const isUser = m.sender_id === currentUser.id;
+          const bubbleClass = isUser ? 'chat-bubble-user' : 'chat-bubble-admin';
+          const senderName = isUser ? 'You' : RSApp.escapeHTML(m.sender.full_name + ' (Staff)');
+          const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          msgHtml += `
+            <div class="chat-bubble ${bubbleClass}">
+              <div>${RSApp.escapeHTML(m.message)}</div>
+              <div class="chat-meta"><strong>${senderName}</strong> · ${time}</div>
+            </div>
+          `;
+        });
+        threadContainer.innerHTML = msgHtml;
+      }
+
+      document.getElementById('modalViewTicket').classList.add('active');
+    }
+
+    async function handleSendTicketReply(e) {
+      e.preventDefault();
+      const ticketId = document.getElementById('activeTicketId').value;
+      const text = document.getElementById('replyMessageText').value;
+
+      const { data, error } = await RSApp.replyTicket(ticketId, text);
+      if (error) {
+        alert(error.message);
+        return;
+      }
+      document.getElementById('replyMessageText').value = '';
+      viewTicket(ticketId); // Refresh conversation
+      loadTickets();
+    }
+
+    // --- Security / Password Change ---
+    async function handleChangePassword(e) {
+      e.preventDefault();
+      const cur = document.getElementById('currentPass').value;
+      const np = document.getElementById('newPass').value;
+      const cp = document.getElementById('confirmPass').value;
+      const alertBox = document.getElementById('securityAlert');
+
+      alertBox.style.display = 'block';
+
+      if (np !== cp) {
+        alertBox.style.background = '#fef3f2';
+        alertBox.style.color = '#b42318';
+        alertBox.textContent = 'New passwords do not match.';
+        return;
+      }
+
+      const { data, error } = await RSApp.changePassword(cur, np);
+      if (error) {
+        alertBox.style.background = '#fef3f2';
+        alertBox.style.color = '#b42318';
+        alertBox.textContent = error.message;
+      } else {
+        alertBox.style.background = '#e6f7ec';
+        alertBox.style.color = '#027a48';
+        alertBox.textContent = 'Password updated successfully!';
+        document.getElementById('currentPass').value = '';
+        document.getElementById('newPass').value = '';
+        document.getElementById('confirmPass').value = '';
+      }
+    }
+
+    async function handleLogout() {
+      await RSApp.signOut();
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

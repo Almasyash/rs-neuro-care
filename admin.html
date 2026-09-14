@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Management Console | RS Neuro Care Centre</title>
+  <meta name="description" content="Administrative control panel for RS Neuro Care Centre platform.">
+  <link rel="icon" type="image/png" href="rs logo.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="supabase-config.js"></script>
+</head>
+<body style="background: var(--gray-light);">
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">
+        <img src="rs logo.png" alt="RS Neuro Care Centre Logo" class="logo-img">
+        <span>Neuro Care</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html">🏠 Home</a>
+        <a href="about.html">👨‍⚕️ About</a>
+        <a href="services.html">🩺 Services</a>
+        <a href="courses.html">🎓 Courses</a>
+        <a href="contact.html">📞 Contact</a>
+        <a href="tel:08797459791" class="btn">📅 Call now</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="dashboard-layout">
+      <!-- Admin Sidebar -->
+      <aside class="dashboard-sidebar">
+        <div style="text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--soft-blue);">
+          <div style="font-size: 3rem; margin-bottom: 6px;">🛡️</div>
+          <h3 id="adminUserName" style="font-size: 1.1rem; margin-bottom: 2px;">Administrator</h3>
+          <span class="badge badge-admin">Master Admin</span>
+        </div>
+        <ul class="dashboard-menu">
+          <li>
+            <button class="dashboard-menu-item active" onclick="switchAdminTab('overview', this)">
+              <span>📊</span> System Overview
+            </button>
+          </li>
+          <li>
+            <button class="dashboard-menu-item" onclick="switchAdminTab('enrollments', this)">
+              <span>📋</span> Enrollments <span class="badge badge-pending" id="badgePendingCount" style="margin-left: auto;">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="dashboard-menu-item" onclick="switchAdminTab('courses', this)">
+              <span>🎓</span> Manage Courses
+            </button>
+          </li>
+          <li>
+            <button class="dashboard-menu-item" onclick="switchAdminTab('support', this)">
+              <span>💬</span> Support Inbox <span class="badge badge-urgent" id="badgeOpenTicketsCount" style="margin-left: auto;">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="dashboard-menu-item" onclick="switchAdminTab('users', this)">
+              <span>👥</span> User Accounts
+            </button>
+          </li>
+          <li>
+            <button class="dashboard-menu-item" onclick="switchAdminTab('audit', this)">
+              <span>📜</span> Security Audit Log
+            </button>
+          </li>
+          <li style="margin-top: 16px; border-top: 1px solid var(--soft-blue); padding-top: 10px;">
+            <button class="dashboard-menu-item" style="color: #b42318;" onclick="handleAdminLogout()">
+              <span>🚪</span> Logout
+            </button>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Main Admin Panel Content -->
+      <section class="dashboard-main">
+        
+        <!-- TAB: SYSTEM OVERVIEW -->
+        <div id="adminTabOverview">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">Total Users</div>
+              <div class="metric-value" id="metricUsers">0</div>
+              <small style="color: var(--text-soft);">Registered accounts</small>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Enrollments</div>
+              <div class="metric-value" id="metricEnrollments">0</div>
+              <small style="color: var(--text-soft);">Total applications</small>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Pending Review</div>
+              <div class="metric-value" id="metricPending" style="color: #b76e00;">0</div>
+              <small style="color: var(--text-soft);">Requires counseling</small>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Open Tickets</div>
+              <div class="metric-value" id="metricTickets" style="color: #b42318;">0</div>
+              <small style="color: var(--text-soft);">Unresolved queries</small>
+            </div>
+          </div>
+
+          <div class="card" style="padding: 24px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.2rem;">⚡ Recent Administrative Activity</h3>
+              <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;" onclick="switchAdminTab('audit')">View Full Audit Log</button>
+            </div>
+            <div id="overviewAuditStream">
+              <p style="color: var(--text-soft); font-size: 0.9rem;">Loading recent system events...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: ENROLLMENT MANAGEMENT -->
+        <div id="adminTabEnrollments" class="card" style="display: none; padding: 30px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.5rem; margin-bottom: 4px;">📋 Course Enrollment Applications</h2>
+              <p>Review student applications, update admission statuses, and leave counselor notes.</p>
+            </div>
+            <div>
+              <select id="enrollmentStatusFilter" class="form-control" style="width: auto; display: inline-block;" onchange="loadAdminEnrollments()">
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending Only</option>
+                <option value="contacted">Contacted</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="adminEnrollmentsTable" class="rs-table-container">
+            <p style="padding: 20px; text-align: center; color: var(--text-soft);">Loading enrollments...</p>
+          </div>
+        </div>
+
+        <!-- TAB: COURSE MANAGEMENT -->
+        <div id="adminTabCourses" class="card" style="display: none; padding: 30px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.5rem; margin-bottom: 4px;">🎓 Educational Programs & Workshops</h2>
+              <p>Manage courses published on the public website.</p>
+            </div>
+            <button class="btn" style="padding: 8px 18px; font-size: 0.88rem;" onclick="openAddCourseModal()">➕ Add New Course</button>
+          </div>
+
+          <div id="adminCoursesTable" class="rs-table-container">
+            <p style="padding: 20px; text-align: center; color: var(--text-soft);">Loading course programs...</p>
+          </div>
+        </div>
+
+        <!-- TAB: SUPPORT INBOX -->
+        <div id="adminTabSupport" class="card" style="display: none; padding: 30px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.5rem; margin-bottom: 4px;">💬 Support & Patient Queries</h2>
+              <p>Respond to clinical inquiries and student tickets.</p>
+            </div>
+          </div>
+
+          <div id="adminSupportTable" class="rs-table-container">
+            <p style="padding: 20px; text-align: center; color: var(--text-soft);">Loading support tickets...</p>
+          </div>
+        </div>
+
+        <!-- TAB: USER MANAGEMENT -->
+        <div id="adminTabUsers" class="card" style="display: none; padding: 30px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.5rem; margin-bottom: 4px;">👥 User Accounts & Roles</h2>
+              <p>Search registered accounts and manage account statuses.</p>
+            </div>
+            <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name or email..." style="max-width: 250px;" oninput="filterAdminUsers()">
+          </div>
+
+          <div id="adminUsersTable" class="rs-table-container">
+            <p style="padding: 20px; text-align: center; color: var(--text-soft);">Loading users...</p>
+          </div>
+        </div>
+
+        <!-- TAB: SECURITY AUDIT LOG -->
+        <div id="adminTabAudit" class="card" style="display: none; padding: 30px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.5rem; margin-bottom: 4px;">📜 Security & Action Audit Trail</h2>
+              <p>Tamper-evident record of all system and administrative events.</p>
+            </div>
+            <button class="btn btn-outline" style="padding: 6px 14px; font-size: 0.85rem;" onclick="loadAdminAuditLogs()">🔄 Refresh</button>
+          </div>
+
+          <div id="adminAuditTable" class="rs-table-container">
+            <p style="padding: 20px; text-align: center; color: var(--text-soft);">Loading audit records...</p>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal: Add / Edit Course -->
+  <div class="rs-modal-backdrop" id="modalCourseForm">
+    <div class="rs-modal-content">
+      <button class="rs-modal-close" onclick="closeModal('modalCourseForm')">✕</button>
+      <h3 id="courseModalTitle" style="font-size: 1.3rem; margin-bottom: 8px;">Create New Course</h3>
+      <form onsubmit="handleSaveCourse(event)">
+        <input type="hidden" id="courseEditId">
+        <div class="form-group">
+          <label class="form-label">Course Title</label>
+          <input type="text" id="courseTitle" class="form-control" placeholder="e.g. Fellowship in Spinal Care" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duration</label>
+          <input type="text" id="courseDuration" class="form-control" placeholder="e.g. 6 months · weekend batches" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Eligibility Criteria</label>
+          <input type="text" id="courseEligibility" class="form-control" placeholder="e.g. BPT / GNM / MBBS" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tuition Fee (₹)</label>
+          <input type="number" id="courseFee" class="form-control" placeholder="0 for free" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="courseStatus" class="form-control" required>
+            <option value="published">Published (Visible on site)</option>
+            <option value="draft">Draft (Hidden)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description & Highlights</label>
+          <textarea id="courseDescription" class="form-control" rows="3" placeholder="Course syllabus and practical techniques..." required></textarea>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn" style="flex: 1;">Save Program</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalCourseForm')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Admin Reply & Ticket Management -->
+  <div class="rs-modal-backdrop" id="modalAdminTicket">
+    <div class="rs-modal-content" style="max-width: 650px;">
+      <button class="rs-modal-close" onclick="closeModal('modalAdminTicket')">✕</button>
+      <div style="margin-bottom: 12px;">
+        <span class="badge" id="adminTicketStatusBadge">Open</span>
+        <h3 id="adminTicketSubject" style="font-size: 1.3rem; margin: 8px 0 4px;">Ticket Subject</h3>
+        <p style="font-size: 0.82rem; color: var(--text-soft);" id="adminTicketMeta">User details...</p>
+      </div>
+
+      <!-- Messages Thread -->
+      <div class="chat-thread" id="adminTicketMessages">
+        <p style="text-align: center; color: var(--text-soft);">Loading conversation...</p>
+      </div>
+
+      <!-- Status Updater & Reply -->
+      <form onsubmit="handleAdminTicketReply(event)">
+        <input type="hidden" id="activeAdminTicketId">
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <div style="flex: 1;">
+            <label class="form-label">Change Status</label>
+            <select id="adminTicketStatusSelect" class="form-control">
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="waiting_user">Waiting for User</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label class="form-label">Priority</label>
+            <select id="adminTicketPrioritySelect" class="form-control">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 8px;">
+          <textarea id="adminReplyText" class="form-control" rows="3" placeholder="Write response to student/patient..." required></textarea>
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">💬 Send Response</button>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <img src="rs logo.png" alt="RS Neuro Care Centre Logo" class="footer-logo-img">
+      <p>
+        <span class="footer-emoji">🧠</span> RS Neuro Care Centre — Dr. R. K. Gupta 
+        <span class="footer-emoji">🩺</span><br>
+        Manuwapul, Bettiah, Bihar 845450 · 📞 <a href="tel:08797459791" style="color: var(--primary-dark);">087974 59791</a><br>
+        © 2025 RS Neuro Care Centre. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Navigation toggle
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', () => {
+        const isOpen = navLinks.classList.toggle('nav-open');
+        navToggle.classList.toggle('active');
+        navToggle.setAttribute('aria-expanded', isOpen);
+      });
+    }
+
+    // RBAC Security Boundary: Must be Admin
+    if (!RSApp.requireAuth('admin')) {
+      // Redirect handled by requireAuth
+    }
+
+    let allAdminUsers = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = RSApp.getCurrentUser();
+      if (user) {
+        document.getElementById('adminUserName').textContent = user.full_name;
+      }
+      loadOverviewMetrics();
+    });
+
+    function switchAdminTab(tab, btn) {
+      document.querySelectorAll('.dashboard-menu-item').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const tabs = ['overview', 'enrollments', 'courses', 'support', 'users', 'audit'];
+      tabs.forEach(t => {
+        const el = document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (el) el.style.display = t === tab ? 'block' : 'none';
+      });
+
+      if (tab === 'overview') loadOverviewMetrics();
+      if (tab === 'enrollments') loadAdminEnrollments();
+      if (tab === 'courses') loadAdminCourses();
+      if (tab === 'support') loadAdminSupport();
+      if (tab === 'users') loadAdminUsers();
+      if (tab === 'audit') loadAdminAuditLogs();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    // --- Overview Metrics ---
+    async function loadOverviewMetrics() {
+      const usersRes = await RSApp.getUsers();
+      const enrollRes = await RSApp.getEnrollments();
+      const courseRes = await RSApp.getCourses();
+      const ticketRes = await RSApp.getTickets();
+      const auditRes = await RSApp.getAuditLogs();
+
+      const users = usersRes.data || [];
+      const enrollments = enrollRes.data || [];
+      const courses = courseRes.data || [];
+      const tickets = ticketRes.data || [];
+      const audit = auditRes.data || [];
+
+      const pendingCount = enrollments.filter(e => e.status === 'pending').length;
+      const openTicketCount = tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
+
+      document.getElementById('metricUsers').textContent = users.length;
+      document.getElementById('metricEnrollments').textContent = enrollments.length;
+      document.getElementById('metricPending').textContent = pendingCount;
+      document.getElementById('metricTickets').textContent = openTicketCount;
+
+      document.getElementById('badgePendingCount').textContent = pendingCount;
+      document.getElementById('badgeOpenTicketsCount').textContent = openTicketCount;
+
+      // Recent audit stream
+      const auditStream = document.getElementById('overviewAuditStream');
+      if (audit.length === 0) {
+        auditStream.innerHTML = '<p style="color: var(--text-soft);">No recent events.</p>';
+      } else {
+        let streamHtml = '<ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px;">';
+        audit.slice(0, 5).forEach(a => {
+          const time = new Date(a.created_at).toLocaleString();
+          streamHtml += `
+            <li style="font-size: 0.88rem; padding: 8px 12px; background: var(--gray-light); border-radius: 8px; display: flex; justify-content: space-between;">
+              <span><strong>${RSApp.escapeHTML(a.action)}</strong> (${RSApp.escapeHTML(a.entity_type)}) by ${RSApp.escapeHTML(a.actor_name)}</span>
+              <span style="color: var(--text-soft); font-size: 0.8rem;">${time}</span>
+            </li>
+          `;
+        });
+        streamHtml += '</ul>';
+        auditStream.innerHTML = streamHtml;
+      }
+    }
+
+    // --- Enrollments Management ---
+    async function loadAdminEnrollments() {
+      const container = document.getElementById('adminEnrollmentsTable');
+      const filter = document.getElementById('enrollmentStatusFilter').value;
+      const { data, error } = await RSApp.getEnrollments();
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-soft);">No enrollments found.</p>';
+        return;
+      }
+
+      const filtered = filter === 'all' ? data : data.filter(e => e.status === filter);
+
+      let html = `
+        <table class="rs-table">
+          <thead>
+            <tr>
+              <th>Applicant Name</th>
+              <th>Contact Phone</th>
+              <th>Applied Course</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Counselor Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      filtered.forEach(enr => {
+        const studentName = RSApp.escapeHTML(enr.user ? enr.user.full_name : 'Unknown');
+        const studentPhone = RSApp.escapeHTML(enr.user ? enr.user.phone : 'N/A');
+        const courseTitle = RSApp.escapeHTML(enr.course ? enr.course.title : 'Program');
+        const date = new Date(enr.enrollment_date).toLocaleDateString();
+
+        html += `
+          <tr>
+            <td><strong>${studentName}</strong></td>
+            <td><a href="tel:${studentPhone}" style="color: var(--primary-blue);">${studentPhone}</a></td>
+            <td>${courseTitle}</td>
+            <td><small>${date}</small></td>
+            <td>
+              <select class="form-control" style="padding: 4px 8px; font-size: 0.82rem;" onchange="updateEnrollmentStatus('${enr.id}', this.value)">
+                <option value="pending" ${enr.status === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="contacted" ${enr.status === 'contacted' ? 'selected' : ''}>Contacted</option>
+                <option value="approved" ${enr.status === 'approved' ? 'selected' : ''}>Approved</option>
+                <option value="rejected" ${enr.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                <option value="completed" ${enr.status === 'completed' ? 'selected' : ''}>Completed</option>
+              </select>
+            </td>
+            <td>
+              <a href="https://wa.me/${studentPhone}?text=${encodeURIComponent('Namaste ' + studentName + ', this is Dr. Gupta from RS Neuro Care regarding your admission application.')}" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;">
+                💬 WhatsApp
+              </a>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    async function updateEnrollmentStatus(id, newStatus) {
+      await RSApp.updateEnrollmentStatus(id, newStatus);
+      loadOverviewMetrics();
+    }
+
+    // --- Course Management ---
+    async function loadAdminCourses() {
+      const container = document.getElementById('adminCoursesTable');
+      const { data, error } = await RSApp.getCourses();
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-soft);">No courses found.</p>';
+        return;
+      }
+
+      let html = `
+        <table class="rs-table">
+          <thead>
+            <tr>
+              <th>Course Program</th>
+              <th>Duration</th>
+              <th>Eligibility</th>
+              <th>Fee</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      data.forEach(crs => {
+        const title = RSApp.escapeHTML(crs.title);
+        const duration = RSApp.escapeHTML(crs.duration);
+        const elig = RSApp.escapeHTML(crs.eligibility);
+        const fee = crs.fee > 0 ? '₹' + Number(crs.fee).toLocaleString() : 'Free';
+        const statusBadge = crs.status === 'published' ? '<span class="badge badge-approved">Published</span>' : '<span class="badge badge-pending">Draft</span>';
+
+        html += `
+          <tr>
+            <td><strong>${title}</strong></td>
+            <td>${duration}</td>
+            <td><small>${elig}</small></td>
+            <td><strong>${fee}</strong></td>
+            <td>${statusBadge}</td>
+            <td>
+              <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;" onclick="editCourseModal('${crs.id}')">
+                ✏️ Edit
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function openAddCourseModal() {
+      document.getElementById('courseModalTitle').textContent = 'Create New Course';
+      document.getElementById('courseEditId').value = '';
+      document.getElementById('courseTitle').value = '';
+      document.getElementById('courseDuration').value = '';
+      document.getElementById('courseEligibility').value = '';
+      document.getElementById('courseFee').value = '';
+      document.getElementById('courseStatus').value = 'published';
+      document.getElementById('courseDescription').value = '';
+      document.getElementById('modalCourseForm').classList.add('active');
+    }
+
+    async function editCourseModal(courseId) {
+      const { data } = await RSApp.getCourses();
+      const course = data.find(c => c.id === courseId);
+      if (!course) return;
+
+      document.getElementById('courseModalTitle').textContent = 'Edit Course Program';
+      document.getElementById('courseEditId').value = course.id;
+      document.getElementById('courseTitle').value = course.title;
+      document.getElementById('courseDuration').value = course.duration;
+      document.getElementById('courseEligibility').value = course.eligibility;
+      document.getElementById('courseFee').value = course.fee;
+      document.getElementById('courseStatus').value = course.status;
+      document.getElementById('courseDescription').value = course.description;
+      document.getElementById('modalCourseForm').classList.add('active');
+    }
+
+    async function handleSaveCourse(e) {
+      e.preventDefault();
+      const id = document.getElementById('courseEditId').value;
+      const courseData = {
+        title: document.getElementById('courseTitle').value,
+        duration: document.getElementById('courseDuration').value,
+        eligibility: document.getElementById('courseEligibility').value,
+        fee: parseFloat(document.getElementById('courseFee').value) || 0,
+        status: document.getElementById('courseStatus').value,
+        description: document.getElementById('courseDescription').value
+      };
+      if (id) courseData.id = id;
+
+      await RSApp.saveCourse(courseData);
+      closeModal('modalCourseForm');
+      loadAdminCourses();
+      loadOverviewMetrics();
+    }
+
+    // --- Support Inbox Management ---
+    async function loadAdminSupport() {
+      const container = document.getElementById('adminSupportTable');
+      const { data, error } = await RSApp.getTickets();
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-soft);">No support tickets.</p>';
+        return;
+      }
+
+      let html = `
+        <table class="rs-table">
+          <thead>
+            <tr>
+              <th>User Name</th>
+              <th>Subject</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      data.forEach(tkt => {
+        const userName = RSApp.escapeHTML(tkt.user ? tkt.user.full_name : 'User');
+        const subject = RSApp.escapeHTML(tkt.subject);
+        const category = RSApp.escapeHTML(tkt.category.replace('_', ' ').toUpperCase());
+        const priorityBadge = '<span class="badge badge-' + tkt.priority + '">' + tkt.priority.toUpperCase() + '</span>';
+        const statusBadge = '<span class="badge badge-' + tkt.status + '">' + tkt.status.replace('_', ' ').toUpperCase() + '</span>';
+
+        html += `
+          <tr>
+            <td><strong>${userName}</strong></td>
+            <td>${subject}</td>
+            <td><small>${category}</small></td>
+            <td>${priorityBadge}</td>
+            <td>${statusBadge}</td>
+            <td>
+              <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;" onclick="adminViewTicket('${tkt.id}')">
+                💬 Reply & Manage
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    async function adminViewTicket(ticketId) {
+      const { data, error } = await RSApp.getTicketMessages(ticketId);
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      const { ticket, messages } = data;
+      document.getElementById('activeAdminTicketId').value = ticket.id;
+      document.getElementById('adminTicketSubject').textContent = ticket.subject;
+      document.getElementById('adminTicketMeta').textContent = `User: ${ticket.user ? ticket.user.full_name : 'User'} · Category: ${ticket.category.toUpperCase()} · Priority: ${ticket.priority.toUpperCase()}`;
+      
+      const badge = document.getElementById('adminTicketStatusBadge');
+      badge.textContent = ticket.status.replace('_', ' ').toUpperCase();
+      badge.className = 'badge badge-' + ticket.status;
+
+      document.getElementById('adminTicketStatusSelect').value = ticket.status;
+      document.getElementById('adminTicketPrioritySelect').value = ticket.priority;
+
+      const thread = document.getElementById('adminTicketMessages');
+      if (messages.length === 0) {
+        thread.innerHTML = '<p style="text-align: center; color: var(--text-soft);">No messages yet.</p>';
+      } else {
+        let msgHtml = '';
+        messages.forEach(m => {
+          const isAdmin = m.sender.role === 'admin';
+          const bubbleClass = isAdmin ? 'chat-bubble-admin' : 'chat-bubble-user';
+          const senderLabel = isAdmin ? 'You (Staff)' : RSApp.escapeHTML(m.sender.full_name);
+          const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          msgHtml += `
+            <div class="chat-bubble ${bubbleClass}">
+              <div>${RSApp.escapeHTML(m.message)}</div>
+              <div class="chat-meta"><strong>${senderLabel}</strong> · ${time}</div>
+            </div>
+          `;
+        });
+        thread.innerHTML = msgHtml;
+      }
+
+      document.getElementById('modalAdminTicket').classList.add('active');
+    }
+
+    async function handleAdminTicketReply(e) {
+      e.preventDefault();
+      const ticketId = document.getElementById('activeAdminTicketId').value;
+      const replyText = document.getElementById('adminReplyText').value;
+      const newStatus = document.getElementById('adminTicketStatusSelect').value;
+      const newPriority = document.getElementById('adminTicketPrioritySelect').value;
+
+      await RSApp.updateTicketStatus(ticketId, newStatus, newPriority);
+      await RSApp.replyTicket(ticketId, replyText);
+
+      document.getElementById('adminReplyText').value = '';
+      closeModal('modalAdminTicket');
+      loadAdminSupport();
+      loadOverviewMetrics();
+    }
+
+    // --- User Accounts Management ---
+    async function loadAdminUsers() {
+      const container = document.getElementById('adminUsersTable');
+      const { data, error } = await RSApp.getUsers();
+
+      if (error || !data) {
+        container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-soft);">Failed to load users.</p>';
+        return;
+      }
+
+      allAdminUsers = data;
+      renderAdminUsers(allAdminUsers);
+    }
+
+    function renderAdminUsers(users) {
+      const container = document.getElementById('adminUsersTable');
+      let html = `
+        <table class="rs-table">
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Account Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      users.forEach(u => {
+        const name = RSApp.escapeHTML(u.full_name);
+        const email = RSApp.escapeHTML(u.email);
+        const phone = RSApp.escapeHTML(u.phone || 'N/A');
+        const roleBadge = '<span class="badge badge-' + u.role + '">' + u.role.toUpperCase() + '</span>';
+        const statusBadge = '<span class="badge badge-' + u.status + '">' + u.status.toUpperCase() + '</span>';
+
+        html += `
+          <tr>
+            <td><strong>${name}</strong></td>
+            <td>${email}</td>
+            <td>${phone}</td>
+            <td>${roleBadge}</td>
+            <td>${statusBadge}</td>
+            <td>
+              ${u.role !== 'admin' ? `
+                <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.78rem;" onclick="toggleUserStatus('${u.id}', '${u.status === 'active' ? 'suspended' : 'active'}')">
+                  ${u.status === 'active' ? '🚫 Suspend' : '✅ Activate'}
+                </button>
+              ` : '<small style="color: var(--text-soft);">Protected</small>'}
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function filterAdminUsers() {
+      const query = document.getElementById('userSearchInput').value.toLowerCase();
+      const filtered = allAdminUsers.filter(u => 
+        u.full_name.toLowerCase().includes(query) || 
+        u.email.toLowerCase().includes(query)
+      );
+      renderAdminUsers(filtered);
+    }
+
+    async function toggleUserStatus(userId, newStatus) {
+      await RSApp.updateProfile(userId, { status: newStatus });
+      loadAdminUsers();
+      loadOverviewMetrics();
+    }
+
+    // --- Audit Logs ---
+    async function loadAdminAuditLogs() {
+      const container = document.getElementById('adminAuditTable');
+      const { data, error } = await RSApp.getAuditLogs();
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-soft);">No audit records found.</p>';
+        return;
+      }
+
+      let html = `
+        <table class="rs-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Action</th>
+              <th>Entity</th>
+              <th>Actor</th>
+              <th>Record ID</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      data.forEach(log => {
+        const time = new Date(log.created_at).toLocaleString();
+        const action = RSApp.escapeHTML(log.action);
+        const entity = RSApp.escapeHTML(log.entity_type);
+        const actor = RSApp.escapeHTML(log.actor_name);
+        const targetId = RSApp.escapeHTML(log.entity_id || 'N/A');
+
+        html += `
+          <tr>
+            <td><small>${time}</small></td>
+            <td><strong>${action}</strong></td>
+            <td><span class="badge badge-medium">${entity}</span></td>
+            <td>${actor}</td>
+            <td><code>${targetId}</code></td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    async function handleAdminLogout() {
+      await RSApp.signOut();
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
