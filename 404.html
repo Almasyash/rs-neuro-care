@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found (404) | RS Neuro Care Centre Bettiah</title>
+  <meta name="description" content="The requested page could not be found. Return to RS Neuro Care Centre home.">
+  <link rel="icon" type="image/png" href="rs logo.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="supabase-config.js"></script>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">
+        <img src="rs logo.png" alt="RS Neuro Care Centre Logo" class="logo-img">
+        <span>Neuro Care</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html">🏠 Home</a>
+        <a href="about.html">👨‍⚕️ About</a>
+        <a href="services.html">🩺 Services</a>
+        <a href="courses.html">🎓 Courses</a>
+        <a href="contact.html">📞 Contact</a>
+        <a href="tel:08797459791" class="btn">📅 Call now</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding: 80px 20px; text-align: center; min-height: 60vh;">
+    <div style="font-size: 4rem; margin-bottom: 10px;">🩺 404</div>
+    <h1 style="font-size: 2.2rem; margin-bottom: 12px;">Page Not Found</h1>
+    <p style="max-width: 500px; margin: 0 auto 24px;">The page you are looking for might have been moved, renamed, or is temporarily unavailable.</p>
+    <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+      <a href="index.html" class="btn">🏠 Return to Home</a>
+      <a href="courses.html" class="btn btn-outline">🎓 Explore Courses</a>
+      <a href="contact.html" class="btn btn-outline">📞 Contact Clinic</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <img src="rs logo.png" alt="RS Neuro Care Centre Logo" class="footer-logo-img">
+      <p>
+        <span class="footer-emoji">🧠</span> RS Neuro Care Centre — Dr. R. K. Gupta 
+        <span class="footer-emoji">🩺</span><br>
+        Manuwapul, Bettiah, Bihar 845450 · 📞 <a href="tel:08797459791" style="color: var(--primary-dark);">087974 59791</a><br>
+        © 2025 RS Neuro Care Centre. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', () => {
+        const isOpen = navLinks.classList.toggle('nav-open');
+        navToggle.classList.toggle('active');
+        navToggle.setAttribute('aria-expanded', isOpen);
+      });
+    }
+  </script>
+</body>
+</html>
